@@ -2,6 +2,11 @@
 # rewriting a file before ESLint reads it.
 pre-commit:
   jobs:
+    # Public repo: block commits that contain anything that looks like a secret.
+    # gitleaks is a Homebrew binary, not a pnpm package: `brew install gitleaks`.
+    - name: gitleaks
+      run: gitleaks git --pre-commit --staged --redact --no-banner
+
     - name: prettier
       glob: "*.{ts,tsx,js,mjs,cjs,json,yml,yaml,md}"
       run: pnpm prettier --write --ignore-unknown {staged_files}
@@ -13,9 +18,9 @@ pre-commit:
     - name: eslint-server
       root: "apps/server/"
       glob: "*.{ts,tsx,js,mjs}"
-      run: pnpm eslint {staged_files}
+      run: pnpm eslint --max-warnings=0 {staged_files}
 
     - name: eslint-mobile
       root: "apps/mobile/"
       glob: "*.{ts,tsx,js}"
-      run: pnpm eslint {staged_files}
+      run: pnpm eslint --max-warnings=0 {staged_files}

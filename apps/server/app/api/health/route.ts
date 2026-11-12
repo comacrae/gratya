@@ -1,3 +1,3 @@
-export const GET = (req: Request) => {
+export const GET = () => {
   return Response.json({ ok: true }, { status: 200 });
 };
