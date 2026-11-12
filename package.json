@@ -1,6 +1,9 @@
 {
   "name": "gratya",
-  "private":true,
+  "private": true,
   "packageManager": "pnpm@10.32.1",
-  "scripts":{}
+  "scripts": {},
+  "devDependencies": {
+    "lefthook": "^2.2.2"
+  }
 }
