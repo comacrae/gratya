@@ -92,7 +92,7 @@ These are settled. Don't reopen them mid-build; write a note in `docs/DECISIONS.
 
 | Area | Decision |
 |---|---|
-| Repo | `comacrae/gratya` on GitHub. pnpm workspaces monorepo: `apps/mobile`, `apps/api`, `packages/shared`. Packages are scoped `@grat/*`. |
+| Repo | `comacrae/gratya` on GitHub. pnpm workspaces monorepo: `apps/mobile`, `apps/api`, `packages/shared`. Packages are scoped `@gratya/*`. |
 | Branching | `main` only. Feature branch per PR. Squash merge. Never commit straight to `main`. |
 | Mobile | Expo (managed), TypeScript, Expo Router, TanStack Query, React Hook Form + Zod, NativeWind, expo-secure-store |
 | API | Next.js (App Router, route handlers only, no pages), Prisma 7, Zod, Vitest |
@@ -517,14 +517,14 @@ Session handling: `lib/auth.tsx` provides `{ session, signIn, signUp, signOut }`
 - `pnpm dev:api` serves `http://localhost:3000/api/health`.
 - Phone on the same Wi-Fi shows `{ "ok": true }` from your Mac's LAN IP.
 - `pnpm lint` and `pnpm typecheck` pass from root.
-- Both apps import something from `@grat/shared`.
+- Both apps import something from `@gratya/shared`.
 
 **Pitfalls**
 - `localhost` on the phone is the phone. Use the LAN IP.
 - macOS firewall may block port 3000; allow Node when prompted.
 - Expo caches env vars; restart with `expo start -c` after changing `.env`.
 
-**Be able to explain:** what happens, step by step, between the phone calling `fetch` and the JSON appearing on screen; what a workspace symlink is and why `@grat/shared` resolves; the difference between a route handler and a page; why `EXPO_PUBLIC_` is required and what it implies.
+**Be able to explain:** what happens, step by step, between the phone calling `fetch` and the JSON appearing on screen; what a workspace symlink is and why `@gratya/shared` resolves; the difference between a route handler and a page; why `EXPO_PUBLIC_` is required and what it implies.
 
 ---
 
