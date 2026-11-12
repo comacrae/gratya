@@ -24,3 +24,10 @@ pre-commit:
       root: "apps/mobile/"
       glob: "*.{ts,tsx,js}"
       run: pnpm eslint --max-warnings=0 {staged_files}
+
+# Runs on `git push`. Type-checking reads the whole project, so it's too slow
+# for every commit but cheap enough to run before code leaves your machine.
+pre-push:
+  jobs:
+    - name: typecheck
+      run: pnpm typecheck
