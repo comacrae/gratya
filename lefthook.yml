@@ -1,42 +1,21 @@
-# EXAMPLE USAGE:
-#
-#   Refer for explanation to following link:
-#   https://lefthook.dev/configuration/
-#
-# pre-push:
-#   jobs:
-#     - name: packages audit
-#       tags:
-#         - frontend
-#         - security
-#       run: yarn audit
-#
-#     - name: gems audit
-#       tags:
-#         - backend
-#         - security
-#       run: bundle audit
-#
-# pre-commit:
-#   parallel: true
-#   jobs:
-#     - run: yarn eslint {staged_files}
-#       glob: "*.{js,ts,jsx,tsx}"
-#
-#     - name: rubocop
-#       glob: "*.rb"
-#       exclude:
-#         - config/application.rb
-#         - config/routes.rb
-#       run: bundle exec rubocop --force-exclusion -- {all_files}
-#
-#     - name: govet
-#       files: git ls-files -m
-#       glob: "*.go"
-#       run: go vet -- {files}
-#
-#     - script: "hello.js"
-#       runner: node
-#
-#     - script: "hello.go"
-#       runner: go run
+# Runs on `git commit`. Jobs run in order (not parallel) so Prettier finishes
+# rewriting a file before ESLint reads it.
+pre-commit:
+  jobs:
+    - name: prettier
+      glob: "*.{ts,tsx,js,mjs,cjs,json,yml,yaml,md}"
+      run: pnpm prettier --write --ignore-unknown {staged_files}
+      stage_fixed: true
+
+    # ESLint 9 finds its config from the working directory, so each app's
+    # lint runs from inside that app. `root` also skips the job when no
+    # staged file is under that folder.
+    - name: eslint-server
+      root: "apps/server/"
+      glob: "*.{ts,tsx,js,mjs}"
+      run: pnpm eslint {staged_files}
+
+    - name: eslint-mobile
+      root: "apps/mobile/"
+      glob: "*.{ts,tsx,js}"
+      run: pnpm eslint {staged_files}

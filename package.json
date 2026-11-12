@@ -2,8 +2,12 @@
   "name": "gratya",
   "private": true,
   "packageManager": "pnpm@10.32.1",
-  "scripts": {},
+  "scripts": {
+    "lint": "pnpm -r lint",
+    "format": "prettier --write ."
+  },
   "devDependencies": {
-    "lefthook": "^2.2.2"
+    "lefthook": "^2.2.2",
+    "prettier": "^3.10.1"
   }
 }
