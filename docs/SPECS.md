@@ -92,7 +92,7 @@ These are settled. Don't reopen them mid-build; write a note in `docs/DECISIONS.
 
 | Area | Decision |
 |---|---|
-| Repo | `comacrae/gratya` on GitHub. pnpm workspaces monorepo: `apps/mobile`, `apps/api`, `packages/shared`. Packages are scoped `@gratya/*`. |
+| Repo | `comacrae/gratya` on GitHub. pnpm workspaces monorepo: `apps/mobile`, `apps/server`, `packages/shared`. Packages are scoped `@gratya/*`. |
 | Branching | `main` only. Feature branch per PR. Squash merge. Never commit straight to `main`. |
 | Mobile | Expo (managed), TypeScript, Expo Router, TanStack Query, React Hook Form + Zod, NativeWind, expo-secure-store |
 | API | Next.js (App Router, route handlers only, no pages), Prisma 7, Zod, Vitest |
@@ -134,7 +134,7 @@ gratya/
 │   │   ├── lib/                  api.ts (fetch wrapper), supabase.ts, auth.tsx (session context)
 │   │   ├── features/             one folder per resource: posts/, circles/ — hooks + components
 │   │   └── components/ui/        shared primitives (Button, Input, Screen)
-│   ├── api/
+│   ├── server/
 │   │   ├── app/api/              route handlers, one folder per resource
 │   │   ├── lib/
 │   │   │   ├── prisma.ts         singleton client
@@ -184,7 +184,7 @@ gratya/
 
 ### B3. Permission rules
 
-All rules live in `apps/api/lib/permissions.ts` as named functions that take `(userId, ...)` and return a boolean or throw `ApiError`. Route handlers call these; they never inline a `where userId = ...` check as their only guard.
+All rules live in `apps/server/lib/permissions.ts` as named functions that take `(userId, ...)` and return a boolean or throw `ApiError`. Route handlers call these; they never inline a `where userId = ...` check as their only guard.
 
 | Rule | Definition |
 |---|---|
@@ -210,7 +210,7 @@ A 403 confirms that something exists. Someone who isn't in a circle shouldn't be
 
 ### B4. Environment variables
 
-**`apps/api/.env`** (local) / Vercel project settings (staging, production):
+**`apps/server/.env`** (local) / Vercel project settings (staging, production):
 
 | Name | Notes |
 |---|---|
@@ -238,13 +238,13 @@ Commit `.env.example` files with every key and no values. Never commit a real `.
 
 | Script | Does |
 |---|---|
-| `pnpm dev:api` | `next dev` in apps/api |
+| `pnpm dev:server` | `next dev` in apps/server |
 | `pnpm dev:mobile` | `expo start` in apps/mobile |
 | `pnpm db:migrate` | `prisma migrate dev` against local |
 | `pnpm db:deploy` | `prisma migrate deploy` (used by CI and before promoting to staging or prod) |
 | `pnpm db:generate` | `prisma generate` (rebuilds the typed client after a schema change or a fresh clone) |
 | `pnpm db:studio` | Prisma Studio |
-| `pnpm test` | Vitest in apps/api |
+| `pnpm test` | Vitest in apps/server |
 | `pnpm lint` / `pnpm typecheck` | Across all workspaces |
 
 ---
@@ -255,11 +255,11 @@ Prisma 7 splits its setup across three files. Each has one job:
 
 | File | Job | Reads |
 |---|---|---|
-| `apps/api/prisma/schema.prisma` | Describes the tables | nothing |
-| `apps/api/prisma.config.ts` | Tells the Prisma **CLI** which database to run migrations against | `DIRECT_URL` |
-| `apps/api/lib/prisma.ts` | Creates the client your **running API** queries with | `DATABASE_URL` |
+| `apps/server/prisma/schema.prisma` | Describes the tables | nothing |
+| `apps/server/prisma.config.ts` | Tells the Prisma **CLI** which database to run migrations against | `DIRECT_URL` |
+| `apps/server/lib/prisma.ts` | Creates the client your **running API** queries with | `DATABASE_URL` |
 
-`apps/api/prisma/schema.prisma`:
+`apps/server/prisma/schema.prisma`:
 
 ```prisma
 generator client {
@@ -329,7 +329,7 @@ model CircleMember {
 }
 ```
 
-`apps/api/prisma.config.ts`:
+`apps/server/prisma.config.ts`:
 
 ```ts
 import "dotenv/config";
@@ -506,7 +506,7 @@ Session handling: `lib/auth.tsx` provides `{ session, signIn, signUp, signOut }`
 
 **Steps**
 1. `pnpm init` at root; create `pnpm-workspace.yaml` listing `apps/*` and `packages/*`.
-2. Scaffold `apps/api` with `create-next-app` (TypeScript, App Router, no Tailwind, `src/` off). Delete the default page; add `app/api/health/route.ts` returning `{ ok: true }` for now. **Check:** `curl http://localhost:3000/api/health` prints `{"ok":true}`.
+2. Scaffold `apps/server` with `create-next-app` (TypeScript, App Router, no Tailwind, `src/` off). Delete the default page; add `app/api/health/route.ts` returning `{ ok: true }` for now. **Check:** `curl http://localhost:3000/api/health` prints `{"ok":true}`.
 3. Scaffold `apps/mobile` with `create-expo-app` using the default (Expo Router) template. Strip the example screens down to a single `index.tsx`. **Check:** the app opens in Expo Go on your phone.
 4. Create `packages/shared` with a `package.json`, `tsconfig.json`, and `src/index.ts` exporting a single constant (e.g. `APP_NAME`). Import it in both apps to prove workspace linking works.
 5. Add root scripts from B5 (only the ones that make sense yet), a root `tsconfig.base.json`, ESLint + Prettier config shared across workspaces.
@@ -514,7 +514,7 @@ Session handling: `lib/auth.tsx` provides `{ session, signIn, signUp, signOut }`
 7. Add `.gitignore`, `.env.example` files, and a one-paragraph README.
 
 **Acceptance**
-- `pnpm dev:api` serves `http://localhost:3000/api/health`.
+- `pnpm dev:server` serves `http://localhost:3000/api/health`.
 - Phone on the same Wi-Fi shows `{ "ok": true }` from your Mac's LAN IP.
 - `pnpm lint` and `pnpm typecheck` pass from root.
 - Both apps import something from `@gratya/shared`.
@@ -538,13 +538,13 @@ Session handling: `lib/auth.tsx` provides `{ session, signIn, signUp, signOut }`
 
 **Steps**
 1. `supabase init` at root. In `supabase/config.toml`, disable the local Data API and declare the `post-media` bucket with the same limits as hosted, so local behaves like staging (check the Supabase CLI config reference for the exact keys). Then `supabase start` and note the local DB URL it prints.
-2. In `apps/api`: install `prisma`, `@prisma/client`, `@prisma/adapter-pg`, `pg` and `dotenv`. Create `prisma/schema.prisma` and `prisma.config.ts` from Part C. Add `generated/` to `.gitignore`.
-3. Set `DATABASE_URL` and `DIRECT_URL` in `apps/api/.env` to the local URL (the same value for both).
+2. In `apps/server`: install `prisma`, `@prisma/client`, `@prisma/adapter-pg`, `pg` and `dotenv`. Create `prisma/schema.prisma` and `prisma.config.ts` from Part C. Add `generated/` to `.gitignore`.
+3. Set `DATABASE_URL` and `DIRECT_URL` in `apps/server/.env` to the local URL (the same value for both).
 4. Create the first migration without applying it: `prisma migrate dev --create-only --name init`. Read the generated SQL in `prisma/migrations/` and understand every line. Confirm the timestamp columns say `TIMESTAMPTZ(3)`.
 5. At the bottom of that SQL file, add `ALTER TABLE "<name>" ENABLE ROW LEVEL SECURITY;` for each of the five tables. Then apply it with `pnpm db:migrate`. Editing a migration is only allowed before it has been applied anywhere, which is the case here. **Check:** `pnpm db:studio` shows five empty tables.
 6. Create `lib/prisma.ts`: a singleton client using the `PrismaPg` adapter and `DATABASE_URL` (the standard `globalThis` pattern, so `next dev` hot reload doesn't leak connections).
 7. Make `/api/health` run `SELECT 1` via Prisma and report `db: true/false`.
-8. Apply the migration to staging. Put the staging `DIRECT_URL` in a git-ignored `apps/api/.env.staging` and run `DOTENV_CONFIG_PATH=.env.staging pnpm db:deploy`, so you never edit your local `.env` to point at a hosted database. Confirm the tables exist in the staging dashboard (Table Editor is fine for *viewing*).
+8. Apply the migration to staging. Put the staging `DIRECT_URL` in a git-ignored `apps/server/.env.staging` and run `DOTENV_CONFIG_PATH=.env.staging pnpm db:deploy`, so you never edit your local `.env` to point at a hosted database. Confirm the tables exist in the staging dashboard (Table Editor is fine for *viewing*).
 
 **Acceptance**
 - `pnpm db:studio` shows the five tables locally.
@@ -574,7 +574,7 @@ Session handling: `lib/auth.tsx` provides `{ session, signIn, signUp, signOut }`
 1. **API:** `lib/errors.ts` — `ApiError(status, code, message)` and a `handler()` wrapper that catches `ApiError` → JSON per B2, `ZodError` → 422, anything else → 500 (log it). Every route handler is wrapped from now on.
 2. **API:** `lib/auth.ts` — `requireUser(req)`: read the Bearer token, verify it with a server Supabase client (`auth.getUser(token)`), throw 401 on failure. Then look up the `User` row by `id`. If it doesn't exist, create it with the token's `email` and the `display_name` from the token's user metadata (trimmed, at most 40 characters, or null). Creation must be safe if two first requests arrive at the same moment. Return the user.
 3. **API:** `GET /api/me`, `PATCH /api/me` with `UpdateMeSchema` in shared. **Check:** `curl` without a token returns the 401 envelope.
-4. **Tests:** set up Vitest in `apps/api` against the local Supabase Postgres, truncating tables between tests. Make `requireUser` injectable so tests can act as a given user without a real token. Write the Part G tests for M3.
+4. **Tests:** set up Vitest in `apps/server` against the local Supabase Postgres, truncating tables between tests. Make `requireUser` injectable so tests can act as a given user without a real token. Write the Part G tests for M3.
 5. **Mobile:** `lib/supabase.ts` with the publishable key and a secure storage adapter; `lib/auth.tsx` session provider; root layout redirects to `(auth)` when no session, `(tabs)` when there is one.
 6. **Mobile:** `lib/api.ts` — `api.get/post/patch/delete`, attaches the token, parses the B2 error envelope into a thrown `ApiError` on the client too.
 7. **Mobile:** login screen with React Hook Form + `SignInSchema` from shared.
@@ -644,7 +644,7 @@ Session handling: `lib/auth.tsx` provides `{ session, signIn, signUp, signOut }`
 **Steps**
 1. `.github/workflows/ci.yml`: on `pull_request` and `push` to `main`. Jobs: install (pnpm with cache) → `prisma generate` → lint → typecheck → test. The test job uses a `postgres` service container whose major version matches your local Supabase database (see `major_version` in `supabase/config.toml`); set `DATABASE_URL`/`DIRECT_URL` to it, run `prisma migrate deploy`, then `vitest run`.
 2. Branch protection on `main`: require CI green, require PR.
-3. Vercel: root directory `apps/api`, framework Next.js, install command `pnpm install --frozen-lockfile` from repo root (Vercel has a monorepo setting for this). Make the build run `prisma generate` before `next build`. Add env vars: Preview environment → staging Supabase values; Production environment → prod Supabase values.
+3. Vercel: root directory `apps/server`, framework Next.js, install command `pnpm install --frozen-lockfile` from repo root (Vercel has a monorepo setting for this). Make the build run `prisma generate` before `next build`. Add env vars: Preview environment → staging Supabase values; Production environment → prod Supabase values.
 4. Run `pnpm db:deploy` against prod once, manually, from your machine, using a git-ignored `.env.production` the same way as staging in Milestone 2.
 5. Record the migration rule in DECISIONS.md (see below), and that the upgrade is a CI job that runs `migrate deploy` on merge.
 6. Build the mobile app's `EXPO_PUBLIC_API_URL` from a `.env.staging` and switch to it with a script; confirm the phone works end to end against staging.
@@ -662,7 +662,7 @@ Session handling: `lib/auth.tsx` provides `{ session, signIn, signUp, signOut }`
 - The phone, pointed at staging, can sign up and create a post.
 
 **Pitfalls**
-- Vercel needs to know the monorepo root for pnpm; set "Root Directory" to `apps/api` and enable "Include source files outside Root Directory".
+- Vercel needs to know the monorepo root for pnpm; set "Root Directory" to `apps/server` and enable "Include source files outside Root Directory".
 - "Cannot find module …/generated/prisma" on Vercel or in CI means `prisma generate` didn't run before the build or typecheck.
 - Service container Postgres takes a few seconds to be ready; use the `options: --health-cmd pg_isready` pattern.
 - Never put prod secrets in GitHub Actions. CI only needs the throwaway service container.
