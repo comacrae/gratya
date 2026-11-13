@@ -126,14 +126,15 @@ You repeat this for every milestone. If any command here is new to you, ask the 
 gratya/
 ├── apps/
 │   ├── mobile/
-│   │   ├── app/                  Expo Router screens
-│   │   │   ├── (auth)/           login.tsx, signup.tsx
-│   │   │   ├── (tabs)/           journal.tsx, circles.tsx, settings.tsx
-│   │   │   ├── post/             new.tsx, [id].tsx
-│   │   │   └── circle/           new.tsx, join.tsx, [id].tsx
-│   │   ├── lib/                  api.ts (fetch wrapper), supabase.ts, auth.tsx (session context)
-│   │   ├── features/             one folder per resource: posts/, circles/ — hooks + components
-│   │   └── components/ui/        shared primitives (Button, Input, Screen)
+│   │   └── src/                  all app code; imported as `@/…` (tsconfig `paths`)
+│   │       ├── app/              Expo Router screens
+│   │       │   ├── (auth)/       login.tsx, signup.tsx
+│   │       │   ├── (tabs)/       journal.tsx, circles.tsx, settings.tsx
+│   │       │   ├── post/         new.tsx, [id].tsx
+│   │       │   └── circle/       new.tsx, join.tsx, [id].tsx
+│   │       ├── lib/              api.ts (fetch wrapper), supabase.ts, auth.tsx (session context)
+│   │       ├── features/         one folder per resource: posts/, circles/ — hooks + components
+│   │       └── components/ui/    shared primitives (Button, Input, Screen)
 │   ├── server/
 │   │   ├── app/api/              route handlers, one folder per resource
 │   │   ├── lib/
@@ -161,6 +162,8 @@ gratya/
 ├── supabase/                     config.toml only (for `supabase start`); no migrations here
 └── README.md
 ```
+
+Mobile paths elsewhere in this spec (`lib/auth.tsx`, `features/posts/`, `components/ui/`) are relative to `apps/mobile/src/`. Server paths (`lib/prisma.ts`, `app/api/…`) are relative to `apps/server/`.
 
 ### B2. HTTP conventions
 
