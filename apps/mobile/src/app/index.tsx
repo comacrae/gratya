@@ -21,7 +21,7 @@ export default function HealthScreen() {
         if (res.ok) {
           setResponse(await res.json());
         } else {
-          setError("Failed to fetch");
+          setError(`${res.status}: ${res.statusText}`);
         }
       })
       .catch((error: unknown) =>
