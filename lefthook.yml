@@ -1,0 +1,33 @@
+# Runs on `git commit`. Jobs run in order (not parallel) so Prettier finishes
+# rewriting a file before ESLint reads it.
+pre-commit:
+  jobs:
+    # Public repo: block commits that contain anything that looks like a secret.
+    # gitleaks is a Homebrew binary, not a pnpm package: `brew install gitleaks`.
+    - name: gitleaks
+      run: gitleaks git --pre-commit --staged --redact --no-banner
+
+    - name: prettier
+      glob: "*.{ts,tsx,js,mjs,cjs,json,yml,yaml,md}"
+      run: pnpm prettier --write --ignore-unknown {staged_files}
+      stage_fixed: true
+
+    # ESLint 9 finds its config from the working directory, so each app's
+    # lint runs from inside that app. `root` also skips the job when no
+    # staged file is under that folder.
+    - name: eslint-server
+      root: "apps/server/"
+      glob: "*.{ts,tsx,js,mjs}"
+      run: pnpm eslint --max-warnings=0 {staged_files}
+
+    - name: eslint-mobile
+      root: "apps/mobile/"
+      glob: "*.{ts,tsx,js}"
+      run: pnpm eslint --max-warnings=0 {staged_files}
+
+# Runs on `git push`. Type-checking reads the whole project, so it's too slow
+# for every commit but cheap enough to run before code leaves your machine.
+pre-push:
+  jobs:
+    - name: typecheck
+      run: pnpm typecheck

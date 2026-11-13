@@ -1,0 +1,16 @@
+{
+  "name": "gratya",
+  "private": true,
+  "packageManager": "pnpm@10.32.1",
+  "scripts": {
+    "dev:server": "pnpm --filter server dev",
+    "dev:mobile": "pnpm --filter mobile start",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "lefthook": "^2.2.2",
+    "prettier": "^3.10.1"
+  }
+}

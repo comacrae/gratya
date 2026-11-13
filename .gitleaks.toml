@@ -1,0 +1,20 @@
+# Keep gitleaks' built-in rules and add ones for this project's secrets.
+[extend]
+useDefault = true
+
+# The built-in rules don't catch database URLs with an inline password.
+[[rules]]
+id = "postgres-url-with-password"
+description = "Postgres connection string containing a password"
+regex = '''postgres(?:ql)?://[^:\s/@]+:([^@\s'"]{6,})@'''
+secretGroup = 1
+# Placeholders from docs and .env.example files are fine.
+[[rules.allowlists]]
+regexTarget = "match"
+regexes = ['''\[YOUR-PASSWORD\]''', '''postgres:postgres@''', '''<[^>]+>@''']
+
+# Supabase secret keys (the server-only key; publishable keys are fine to ship).
+[[rules]]
+id = "supabase-secret-key"
+description = "Supabase secret API key"
+regex = '''sb_secret_[A-Za-z0-9_-]{20,}'''
