@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String         @id                      // = Supabase auth.users.id
+  email        String                                  // informational; identity is `id`
+  displayName  String?
+  createdAt    DateTime       @default(now()) @db.Timestamptz(3)
+  posts        Post[]
+  memberships  CircleMember[]
+  ownedCircles Circle[]
+}
+
+model Post {
+  id        String     @id @default(uuid())
+  authorId  String
+  circleId  String?                                    // null = private
+  createdAt DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime   @updatedAt @db.Timestamptz(3)
+  author    User       @relation(fields: [authorId], references: [id])
+  circle    Circle?    @relation(fields: [circleId], references: [id], onDelete: SetNull)
+  items     PostItem[]
+
+  @@index([authorId, createdAt])
+  @@index([circleId, createdAt])
+}
+
+model PostItem {
+  id        String  @id @default(uuid())
+  postId    String
+  content   String
+  photoPath String?                                    // Storage object path, never a URL
+  position  Int
+  post      Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, position])
+}
+
+model Circle {
+  id         String         @id @default(uuid())
+  name       String
+  inviteCode String         @unique
+  ownerId    String
+  createdAt  DateTime       @default(now()) @db.Timestamptz(3)
+  owner      User           @relation(fields: [ownerId], references: [id])
+  members    CircleMember[]
+  posts      Post[]
+}
+
+model CircleMember {
+  circleId String
+  userId   String
+  joinedAt DateTime @default(now()) @db.Timestamptz(3)
+  circle   Circle   @relation(fields: [circleId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@id([circleId, userId])
+  @@index([userId])
+}

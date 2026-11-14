@@ -5,7 +5,7 @@
 project_id = "gratya"
 
 [api]
-enabled = true
+enabled = false
 # Port to use for the API URL.
 port = 54321
 # Schemas to expose in your API. Tables, views and stored procedures in this schema will get API
@@ -116,6 +116,12 @@ port = 54324
 enabled = true
 # The maximum file size allowed (e.g. "5MB", "500KB").
 file_size_limit = "50MiB"
+
+# Mirrors the hosted post-media bucket (M0 step 4): private, 5 MB, JPEG/PNG only.
+[storage.buckets.post-media]
+public = false
+file_size_limit = "5MB"
+allowed_mime_types = ["image/jpeg", "image/png"]
 
 # Uncomment to configure local storage buckets
 # [storage.buckets.images]

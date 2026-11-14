@@ -29,3 +29,6 @@ build
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+#prisma
+generated/
