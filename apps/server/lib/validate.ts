@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { ApiError } from "./errors";
-export const parseQuery = async <S extends z.ZodType>(
+export const parseBody = async <S extends z.ZodType>(
   req: Request,
   schema: S,
 ): Promise<z.infer<S>> => {
   let raw: unknown;
   try {
-    raw = req.json();
+    raw = await req.json();
   } catch {
     throw new ApiError("VALIDATION", "Body must be JSON");
   }
