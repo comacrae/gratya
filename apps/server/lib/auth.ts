@@ -26,7 +26,7 @@ export const requireUser = async (req: Request): Promise<User> => {
     throw new ApiError("UNAUTHENTICATED", "Invalid or expired token");
 
   // parse info for creating user if necessary
-  const rawName: string | null = authUser.user_metadata.display_name;
+  const rawName = authUser.user_metadata.display_name;
   const displayName =
     typeof rawName === "string" ? rawName.trim().slice(0, 40) || null : null;
 
