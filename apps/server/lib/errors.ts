@@ -13,10 +13,10 @@ export class ApiError extends Error {
   }
 }
 
-type RouteFn = <C>(req: Request, ctx: C) => Promise<Response>;
+type RouteFn<C> = (req: Request, ctx: C) => Promise<Response>;
 
 export const handler =
-  <C>(fn: RouteFn) =>
+  <C>(fn: RouteFn<C>) =>
   async (req: Request, ctx: C) => {
     try {
       return await fn(req, ctx);
@@ -31,7 +31,7 @@ export const handler =
           {
             error: {
               code: "VALIDATION",
-              message: err.message,
+              message: "Invalid request",
               details: z.flattenError(err),
             },
           },
