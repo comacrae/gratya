@@ -7,7 +7,11 @@
     "dev:mobile": "pnpm --filter mobile start",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "db:migrate": "pnpm --filter server exec prisma migrate dev",
+    "db:deploy": "pnpm --filter server exec prisma migrate deploy",
+    "db:generate": "pnpm --filter server exec prisma generate",
+    "db:studio": "pnpm --filter server exec prisma studio"
   },
   "devDependencies": {
     "lefthook": "^2.2.2",
