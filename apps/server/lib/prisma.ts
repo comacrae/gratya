@@ -1,8 +1,8 @@
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { ENV_VARS } from "@/util/env";
 
-const dbUrl = process.env.DATABASE_URL;
-if (!dbUrl) throw new Error("DATABASE_URL env var is undefined");
+const dbUrl = ENV_VARS.DATABASE_URL;
 
 const globalForPrismaClient = globalThis as unknown as {
   client?: PrismaClient;
