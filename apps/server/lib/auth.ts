@@ -12,10 +12,11 @@ export const requireUser = async (req: Request): Promise<User> => {
   const parsed = raw.match(
     /^Bearer\s+([A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+)$/i,
   );
+
   if (!parsed)
     throw new ApiError("UNAUTHENTICATED", `Unable to parse JWT bearer token`);
 
-  // pase to supabase auth to get the user
+  // pass to supabase auth to get the user; will return auth err as well
   const jwt = parsed[1];
   const {
     data: { user: authUser },
