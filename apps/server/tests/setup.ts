@@ -6,7 +6,7 @@ import { vi, beforeEach, afterAll } from "vitest";
 import { prisma } from "@/lib/prisma";
 
 //mock @/lib/supabse with a factory that returns the fake module
-vi.mock("@/lib/prisma", () => import("./helpers/fake-supabase"));
+vi.mock("@/lib/supabase", () => import("./helpers/fake-supabase"));
 
 // before each test, empty all public tables
 beforeEach(async () => {
