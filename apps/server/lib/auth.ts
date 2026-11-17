@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { ApiError } from "./errors";
+import { ApiError } from "@gratya/shared";
 import { prisma } from "./prisma";
 import type { User } from "@/generated/prisma/client";
 
