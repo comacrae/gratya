@@ -1,11 +1,13 @@
 import { SplashScreen, Stack } from "expo-router";
 import { SessionProvider, useSession } from "@/lib/auth";
 
-SplashScreen.preventAutoHideAsync(); // hold the splash screen
+SplashScreen.preventAutoHideAsync(); // hold the splash screen up until told otherwise
 
 function SplashController() {
   /**
-   * read isLoading and if false, hide the splash screen
+   * read isLoading and if false, hide the splash screen.
+   * Draws nothing, but only components can call hooks, and a component
+   * re-runs every time the value it reads changes
    */
   const { isLoading } = useSession();
   if (!isLoading) SplashScreen.hide();
