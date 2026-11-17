@@ -1,5 +1,5 @@
 /**
- * Supabase client needs to know who's logged in but the screens don't.
+ * Supabase client knows who's logged in but the screens don't.
  * Root layout needs to ask "is there a session?" to choose between login and the tabs
  * Settings tab needs user's email
  * So we make a React Context
