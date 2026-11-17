@@ -1,8 +1,9 @@
 import { supabase } from "@/lib/supabase";
 import { Text, Button } from "react-native";
+import { Screen } from "@/components/ui/Screen";
 export default function Login() {
   return (
-    <>
+    <Screen>
       <Text>Login</Text>
       <Button
         title="Dev sign in"
@@ -14,6 +15,6 @@ export default function Login() {
           if (error) alert(error.message);
         }}
       />
-    </>
+    </Screen>
   );
 }

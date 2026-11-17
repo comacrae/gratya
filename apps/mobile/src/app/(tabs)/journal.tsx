@@ -1,5 +1,4 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 import { useEffect, useState } from "react";
 
 type HealthResponse = {
@@ -31,9 +30,9 @@ export default function HealthScreen() {
   }, []);
 
   return (
-    <SafeAreaView>
+    <View>
       <Text>{loading ? "Loading..." : JSON.stringify(response)}</Text>
       {error.length > 0 && <Text>{error}</Text>}
-    </SafeAreaView>
+    </View>
   );
 }
