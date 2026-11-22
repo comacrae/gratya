@@ -12,8 +12,10 @@ import { ApiError, ErrorEnvelopeSchema } from "@gratya/shared";
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 if (!apiUrl) throw new Error("EXPO_PUBLIC_API_URL is undefined");
 
-export async function request<T>(
-  method: string,
+type HTTPMethod = "GET" | "PATCH" | "POST" | "DELETE";
+
+async function request<T>(
+  method: HTTPMethod,
   path: string,
   body?: unknown,
 ): Promise<T> {
@@ -25,7 +27,7 @@ export async function request<T>(
   //build headers
   const headers: Record<string, string> = {};
   if (session) headers["Authorization"] = `Bearer ${session.access_token}`;
-  if (body) headers["Content-Type"] = "application/json";
+  if (body !== undefined) headers["Content-Type"] = "application/json";
 
   // fetch full url
   const res = await fetch(`${apiUrl}${path}`, {
@@ -58,3 +60,10 @@ export async function request<T>(
   }
   return data as T;
 }
+
+export const api = {
+  get: <T>(path: string) => request<T>("GET", path),
+  post: <T>(path: string, body?: unknown) => request<T>("POST", path, body),
+  delete: <T>(path: string) => request<T>("DELETE", path),
+  patch: <T>(path: string, body?: unknown) => request<T>("PATCH", path, body),
+};

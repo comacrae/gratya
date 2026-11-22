@@ -1,5 +1,6 @@
 import { Text, View } from "react-native";
 import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 
 type HealthResponse = {
   ok: boolean;
@@ -15,12 +16,11 @@ export default function HealthScreen() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/health`)
+    api
+      .get<HealthResponse>("/api/health")
       .then(async (res) => {
         if (res.ok) {
-          setResponse(await res.json());
-        } else {
-          setError(`${res.status}: ${res.statusText}`);
+          setResponse(res);
         }
       })
       .catch((error: unknown) =>
