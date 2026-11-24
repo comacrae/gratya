@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ApiError } from "./errors";
+import { ApiError } from "@gratya/shared";
 export const parseBody = async <S extends z.ZodType>(
   req: Request,
   schema: S,

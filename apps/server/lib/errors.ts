@@ -1,17 +1,5 @@
-import { ErrorStatus, ErrorCode, ERROR_CODE_STATUS_MAP } from "@gratya/shared";
+import { ApiError } from "@gratya/shared";
 import { z } from "zod";
-
-export class ApiError extends Error {
-  readonly status: ErrorStatus;
-  constructor(
-    readonly code: ErrorCode,
-    message: string,
-  ) {
-    super(message);
-    this.name = "ApiError";
-    this.status = ERROR_CODE_STATUS_MAP[code];
-  }
-}
 
 type RouteFn<C> = (req: Request, ctx: C) => Promise<Response>;
 
@@ -23,7 +11,13 @@ export const handler =
     } catch (err) {
       if (err instanceof ApiError) {
         return Response.json(
-          { error: { code: err.code, message: err.message } },
+          {
+            error: {
+              code: err.code,
+              message: err.message,
+              details: err.details,
+            },
+          },
           { status: err.status },
         );
       } else if (err instanceof z.ZodError) {

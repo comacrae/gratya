@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { GET, PATCH } from "@/app/api/me/route";
 import { prisma } from "@/lib/prisma"; // mocked in fake-supabase.ts
 import { tokenFor } from "../helpers/fake-supabase";
+import { MeSchema } from "@gratya/shared";
 
 const URL_ME = "http://localhost/api/me";
 const newUser = (displayName: string) => ({
@@ -80,5 +81,26 @@ describe("PATCH /api/me", () => {
     const body = await res.json();
     expect(res.status).toBe(422);
     expect(body.error.code).toBe("VALIDATION");
+  });
+
+  it("200s for a valid input", async () => {
+    const u = newUser("Colin");
+    const jwt = tokenFor(u);
+    const getReq = new Request(URL_ME, { headers: { authorization: jwt } });
+
+    await GET(getReq, {}); // register a fake user
+
+    const patchReq = new Request(URL_ME, {
+      method: "PATCH",
+      headers: { authorization: jwt, "content-type": "application/json" },
+      body: JSON.stringify({ displayName: "     new name    " }),
+    });
+
+    const res = await PATCH(patchReq, {});
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    const parseResult = MeSchema.safeParse(body);
+    expect(parseResult.success).toBe(true);
+    expect(parseResult.data?.displayName).toBe("new name");
   });
 });
