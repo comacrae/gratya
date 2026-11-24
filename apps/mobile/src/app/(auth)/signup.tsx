@@ -15,7 +15,7 @@ export default function Signup() {
     setError,
   } = useForm<EmailPasswordSignUp>({
     resolver: zodResolver(EmailPasswordSignUpSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: "", password: "", displayName: "" },
   });
 
   const signup = async (values: EmailPasswordSignUp) => {
@@ -27,7 +27,10 @@ export default function Signup() {
       password: values.password,
       options: { data: { display_name: values.displayName } },
     });
-    if (error) setError("root", { message: error.message });
+    if (error) {
+      setError("root", { message: error.message });
+      return;
+    }
     setNeedsConfirmation(user !== null && session === null);
   };
   return (
@@ -60,14 +63,14 @@ export default function Signup() {
           />
         )}
       />
-      <Text>Username</Text>
+      <Text>Display Name</Text>
 
       <Controller
         control={control}
         name="displayName"
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            autoCapitalize="none"
+            autoCapitalize="words"
             onChangeText={onChange}
             onBlur={onBlur}
             value={value}
@@ -84,7 +87,9 @@ export default function Signup() {
       {errors.password && <Text>{errors.password.message}</Text>}
       {errors.displayName && <Text>{errors.displayName.message}</Text>}
       {errors.root && <Text>{errors.root.message}</Text>}
-      {needsConfirmation && <Text> CHECK EMAIL</Text>}
+      {needsConfirmation && (
+        <Text> Check your email to confirm your account</Text>
+      )}
     </Screen>
   );
 }
