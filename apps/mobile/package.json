@@ -5,6 +5,7 @@
   "dependencies": {
     "@expo/ui": "~58.0.28",
     "@gratya/shared": "workspace:*",
+    "@hookform/resolvers": "^7.0.8",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@supabase/supabase-js": "^2.119.0",
     "aes-js": "^3.1.2",
@@ -24,6 +25,7 @@
     "expo-web-browser": "~58.0.8",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "react-hook-form": "^7.92.0",
     "react-native": "0.88.1",
     "react-native-gesture-handler": "~3.3.0",
     "react-native-get-random-values": "^2.1.0",
