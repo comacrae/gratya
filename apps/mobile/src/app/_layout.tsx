@@ -26,6 +26,7 @@ function RootNavigator() {
       </Stack.Protected>
       <Stack.Protected guard={!session} redirectTo="/journal">
         <Stack.Screen name="(auth)/login" />
+        <Stack.Screen name="(auth)/signup" />
       </Stack.Protected>
     </Stack>
   );

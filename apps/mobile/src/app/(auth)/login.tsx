@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { EmailPasswordSignInSchema } from "@gratya/shared";
 import type { EmailPasswordSignIn } from "@gratya/shared";
+import { Link } from "expo-router";
 export default function Login() {
   const {
     control,
@@ -59,6 +60,7 @@ export default function Login() {
         onPress={() => handleSubmit(login)()}
         disabled={isSubmitting}
       />
+      <Link href="/(auth)/signup">Sign Up</Link>
       {errors.email && <Text>{errors.email.message}</Text>}
       {errors.password && <Text>{errors.password.message}</Text>}
       {errors.root && <Text>{errors.root.message}</Text>}
