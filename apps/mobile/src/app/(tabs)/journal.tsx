@@ -1,27 +1,22 @@
 import { Text, View } from "react-native";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-
-type HealthResponse = {
-  ok: boolean;
-  app: string;
-};
+import type { Health } from "@gratya/shared";
+import { HealthSchema } from "@gratya/shared";
 
 if (process.env.EXPO_PUBLIC_API_URL === undefined)
   throw new Error("EXPO_PUBLIC_API_URL env var undefined");
 
 export default function HealthScreen() {
   const [error, setError] = useState("");
-  const [response, setResponse] = useState<HealthResponse | null>(null);
+  const [response, setResponse] = useState<Health | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     api
-      .get<HealthResponse>("/api/health")
+      .get("/api/health", HealthSchema)
       .then(async (res) => {
-        if (res.ok) {
-          setResponse(res);
-        }
+        setResponse(res);
       })
       .catch((error: unknown) =>
         setError(error instanceof Error ? error.message : String(error)),

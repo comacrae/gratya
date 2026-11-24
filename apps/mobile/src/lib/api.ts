@@ -1,25 +1,25 @@
 /**
- * One private request() function that:
+ *  Aprivate function that:
  *  gets current session
  *  builds headers: Authorization if session; Content-Type JSON if body
  * fetches full URL with method, headers, and body turned into a json string
- * reads body as JSON, throws appropriate err if necessary, and returns data cast as T
  */
 
 import { supabase } from "@/lib/supabase";
 import { ApiError, ErrorEnvelopeSchema } from "@gratya/shared";
+import { z } from "zod";
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 if (!apiUrl) throw new Error("EXPO_PUBLIC_API_URL is undefined");
 
 type HTTPMethod = "GET" | "PATCH" | "POST" | "DELETE";
 
-async function request<T>(
+async function send(
   method: HTTPMethod,
   path: string,
   body?: unknown,
-): Promise<T> {
-  // get current session fresh for each request
+): Promise<unknown> {
+  // get current supabase auth session fresh for each request
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -36,10 +36,10 @@ async function request<T>(
     body: body === undefined ? undefined : JSON.stringify(body),
   });
 
-  if (res.status === 204) return undefined as T;
+  if (res.status === 204) return undefined;
 
   //read body as JSON; if can't read, fall back to null
-  const data = await res.json().catch(() => null);
+  const data: unknown = await res.json().catch(() => null);
 
   // if it failed, try to check why and throw an appropriate client side error
   if (!res.ok) {
@@ -58,12 +58,52 @@ async function request<T>(
         result.data.error.details,
       );
   }
-  return data as T;
+
+  return data;
 }
 
+const parseData = <T>(data: unknown, schema: z.ZodType<T>): T => {
+  const result = schema.safeParse(data);
+  if (!result.success)
+    throw new ApiError(
+      "INTERNAL",
+      "Unexpected response from server",
+      result.error.issues,
+    );
+  return result.data;
+};
+
+const get = async <T>(path: string, schema: z.ZodType<T>): Promise<T> => {
+  const data = await send("GET", path);
+  return parseData(data, schema);
+};
+
+const post = async <T>(
+  path: string,
+  schema: z.ZodType<T>,
+  body?: unknown,
+): Promise<T> => {
+  const data = await send("POST", path, body);
+  return parseData(data, schema);
+};
+
+const patch = async <T>(
+  path: string,
+  schema: z.ZodType<T>,
+  body?: unknown,
+): Promise<T> => {
+  const data = await send("PATCH", path, body);
+  return parseData(data, schema);
+};
+
+const del = async (path: string): Promise<void> => {
+  await send("DELETE", path);
+  return;
+};
+
 export const api = {
-  get: <T>(path: string) => request<T>("GET", path),
-  post: <T>(path: string, body?: unknown) => request<T>("POST", path, body),
-  delete: <T>(path: string) => request<T>("DELETE", path),
-  patch: <T>(path: string, body?: unknown) => request<T>("PATCH", path, body),
+  get: get,
+  post: post,
+  patch: patch,
+  delete: del,
 };
